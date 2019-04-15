@@ -55,6 +55,33 @@ int main() {
           double steer_value;
           double throttle_value;
 
+          double delta = j[1]["steering_angle"];
+          double a = j[1]["throttle"];
+
+          double Lf = 2.5;
+
+          Eigen::VectorXd xvals(ptsx.size());
+          Eigen::VectorXd yvals(ptsy.size());
+
+          for(int i = 0; i < ptsx.size(); i++) {
+            double dx = ptsx[i] - px;
+            double dy = ptsy[i] - py;
+
+            xvals[i] = dx * cos(psi) + dy * sin(psi);
+            yvals[i] = -dx * sin(psi) + dy * cos(psi);
+          }
+
+          auto coeffs = polyfit(xvals, yvals, 3);
+
+          double cte = polyeval(coeffs, 0) - 0;
+          double epsi = 0 - atan(coeffs[1]);
+
+          Eigen::VectorXd state(6);
+          state << 0, 0, 0, v, cte, epsi;
+          auto vars = mpc.Solve(state, coeffs);
+          steer_value = vars[0] / deg2rad(25);
+          throttle_value = vars[1];
+
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the 
           //   steering value back. Otherwise the values will be in between 
@@ -72,6 +99,11 @@ int main() {
            *   connected by a Green line
            */
 
+          for (int i = 2; i < vars.size(); i += 2) {
+            mpc_x_vals.push_back(vars[i]);
+            mpc_y_vals.push_back(vars[i+1]);
+          }
+
           msgJson["mpc_x"] = mpc_x_vals;
           msgJson["mpc_y"] = mpc_y_vals;
 
@@ -84,6 +116,11 @@ int main() {
            *   the vehicle's coordinate system the points in the simulator are 
            *   connected by a Yellow line
            */
+
+          for (int i = 0; i < xvals.size() - 1; i++) {
+            next_x_vals.push_back(xvals[i]);
+            next_y_vals.push_back(yvals[i]);
+          }
 
           msgJson["next_x"] = next_x_vals;
           msgJson["next_y"] = next_y_vals;
