@@ -49,16 +49,11 @@ int main() {
           double v = j[1]["speed"];
 
           /**
-           * TODO: Calculate steering angle and throttle using MPC.
+           * Steering angle and throttle calculation using MPC.
            * Both are in between [-1, 1].
            */
           double steer_value;
           double throttle_value;
-
-          double delta = j[1]["steering_angle"];
-          double a = j[1]["throttle"];
-
-          double Lf = 2.5;
 
           Eigen::VectorXd xvals(ptsx.size());
           Eigen::VectorXd yvals(ptsy.size());
@@ -94,7 +89,7 @@ int main() {
           vector<double> mpc_y_vals;
 
           /**
-           * TODO: add (x,y) points to list here, points are in reference to 
+           * Add (x,y) points to list here, points are in reference to 
            *   the vehicle's coordinate system the points in the simulator are 
            *   connected by a Green line
            */
@@ -137,6 +132,7 @@ int main() {
           //
           // NOTE: REMEMBER TO SET THIS TO 100 MILLISECONDS BEFORE SUBMITTING.
           std::this_thread::sleep_for(std::chrono::milliseconds(100));
+          // std::this_thread::sleep_for(std::chrono::milliseconds(50));
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }  // end "telemetry" if
       } else {
