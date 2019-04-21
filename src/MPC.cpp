@@ -58,13 +58,13 @@ class FG_eval {
     fg[0] = 0;
 
     // Defining cost functions here
-    double w_track_error = 7000;
-    double w_steering_error = 5000;
-    double w_velocity_error = 25;
-    double w_steer = 500;
-    double w_acceleration = 100;
-    double w_steer_change = 225;
-    double w_acceleration_change = 150;
+    const double w_track_error = 7000;
+    const double w_steering_error = 5000;
+    const double w_velocity_error = 25;
+    const double w_steer = 500;
+    const double w_acceleration = 100;
+    const double w_steer_change = 225;
+    const double w_acceleration_change = 150;
 
     // Minimize the state cost
     for (int offset = 0; offset < N; offset++) {

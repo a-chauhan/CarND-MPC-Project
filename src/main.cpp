@@ -52,8 +52,8 @@ int main() {
            * Steering angle and throttle calculation using MPC.
            * Both are in between [-1, 1].
            */
-          double steer_value;
-          double throttle_value;
+          double steer_value = j[1]["steering_angle"];
+          double throttle_value = j[1]["throttle"];	
 
           Eigen::VectorXd xvals(ptsx.size());
           Eigen::VectorXd yvals(ptsy.size());
@@ -71,8 +71,30 @@ int main() {
           double cte = polyeval(coeffs, 0) - 0;
           double epsi = 0 - atan(coeffs[1]);
 
+          const double latency_dt = 0.1;
+          const double Lf = 2.67;
+
+          // px = v * cos(psi) * latency_dt;
+          // py = v * sin(psi) * latency_dt;
+          // psi = v * delta / Lf * latency_dt;
+          // v = v + a * latency_dt;
+          // cte = cte + v * sin(epsi) * latency_dt;
+          // epsi = epsi  - v * delta / Lf * latency_dt;
+
+          double x_lat_adjust = 0, y_lat_adjust = 0,  psi_lat_adjust = 0, v_lat_adjust = v, cte_lat_adjust = cte, epsi_lat_adjust = epsi;	  
+	        x_lat_adjust += v * cos(0) * latency_dt;
+	        y_lat_adjust += v * sin(0) * latency_dt;
+	        psi_lat_adjust += - v/Lf * steer_value * latency_dt;
+	        v_lat_adjust += throttle_value * latency_dt;	    
+	        cte_lat_adjust +=   v * sin(epsi_lat_adjust) * latency_dt;
+	        epsi_lat_adjust += - v * steer_value / Lf * latency_dt;	 
+
+          // Add everything to the state
           Eigen::VectorXd state(6);
-          state << 0, 0, 0, v, cte, epsi;
+          state << x_lat_adjust, y_lat_adjust, psi_lat_adjust, v_lat_adjust, cte_lat_adjust, epsi_lat_adjust;
+
+          // Eigen::VectorXd state(6);
+          // state << 0, 0, 0, v, cte, epsi;
           auto vars = mpc.Solve(state, coeffs);
           steer_value = vars[0] / deg2rad(25);
           throttle_value = vars[1];

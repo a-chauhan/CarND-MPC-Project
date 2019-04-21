@@ -42,8 +42,8 @@ Self-Driving Car Engineer Nanodegree Program
 Model predictive controller to drive the vehicle
 
 ## Model
-x - x coordinate
-y - y coordinate
+x - x car's position x
+y - y car's position y
 psi - orientation
 v - velocity
 cte - Cross Track Error
@@ -53,13 +53,36 @@ Two actuators are:
 delta - steering angle
 a - acceleration
 
+## Equations:
+x[t+1] = x[t] + v[t] * cos(psi[t]) * dt
+y[t+1] = y[t] + v[t] * sin(psi[t]) * dt
+psi[t+1] = psi[t] + v[t] / Lf * delta[t] * dt
+v[t+1] = v[t] + a[t] * dt
+cte[t+1] = f(x[t]) - y[t] + v[t] * sin(epsi[t]) * dt
+epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
+
 ## Timestep Length and duration
 
 N - the number of timesteps
 dt - the time elapsed between actuations
 
+N values are determined based on our use case, large values mean more horizon, will increase computation, and can change by the car's behaviour. It is to be noted that larger N does not mean, the car will follow the exact, but actually, it updates the path dynamically at every time stamp dt. Also it should not be small enough so that the car needs can see just few steps in the future. Also, latency will be increased if N is larger, not favourable.
+
+dt - dt is the time after wich car will update its path, it should be good enough, not too large, not too small. Larger values mean a big differency between the predicted path points and the real path points because of several circumstances, forces. If it is too small, it will do unnecessary computations.
+
+N * dt: the time horizon predict the path in the future with certain assumptions and condition. It will give us a time frame car can move being on the track.
+Since Speed = distance / time, larger time horizon mean (N * dt) = distance/speed, car can travel at high speed with greater certainity about the trajectory points and will remain on the track.
+
+## Polynomial and MPC:
+data provided by simulator, first converted to the car system co-ordinates and then fitted into a polynomial of the 3rd degree.
+
 ## Latency handling
 At slow speed it does not have that much effect, but at higher speeds the vehicle becomes a little bit unstable. I tried to tune the various parameters so that it does not overshoot the track. And giving more weight to the cte error rather than speed. So, car may slow down to avoid the track overshoot.
 
+Also, to handle the latency, the recommed way is to predict the state in future, say 100 ms. Implementation is done by predicting the state at 100ms in future.
+
 ## Result
 The car was able to complete the track.
+
+## Link
+youtube simulation video link: https://youtu.be/6U-wcRKylds
